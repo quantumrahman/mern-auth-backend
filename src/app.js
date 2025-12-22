@@ -3,6 +3,7 @@ import 'dotenv/config';
 import express, { urlencoded } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import errorMiddleware from './middlewares/error.middleware.js';
 
 // app ---------------------------------------------------->
 const app = express();
@@ -22,6 +23,9 @@ app.use(cookieParser());
 app.get('/', (req, res) => {
     res.send('Server ready for working!');
 });
+
+// error middleware --------------------------------------->
+app.use(errorMiddleware);
 
 // export modules ----------------------------------------->
 export default app;
