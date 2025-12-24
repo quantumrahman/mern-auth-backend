@@ -9,7 +9,7 @@ const sendWelcomeEmail = async ({ username, userEmail }) => {
     };
 
     const mailOptions = {
-        from: process.env.SENDER_EMAIL,
+        from: `R.DevStack <${process.env.SENDER_EMAIL}>`,
         to: userEmail,
         subject: 'Welcome to R.DevStack',
         html: welcomeEmailTemplate.replace('{username}', username)
