@@ -1,8 +1,11 @@
 // validator ---------------------------------------------->
 const emailValidator = (email) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const isValid = emailRegex.test(email);
-    return isValid;
+    if (typeof email !== 'string') return false;
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+    
+    return emailRegex.test(normalizedEmail);
 };
 
 // export modules ----------------------------------------->
