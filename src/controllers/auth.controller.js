@@ -88,3 +88,8 @@ export const signUpController = async (req, res, next) => {
         next(error);
     }
 };
+
+// signin controller -------------------------------------->
+export const signInController = async (req, res, next) => {
+
+};
