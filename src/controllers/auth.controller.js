@@ -150,3 +150,8 @@ export const signInController = async (req, res, next) => {
         next(error);
     }
 };
+
+// signout controller ------------------------------------->
+export const signOutController = async (req, res, next) => {
+    
+};
