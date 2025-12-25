@@ -24,7 +24,7 @@ const authMiddleware = async (req, res, next) => {
             });
         }
 
-        const user = await User.findById(decoded.id);
+        const user = await User.findById(decoded.userId);
 
         if (!user) throw new AppError("User not found!", {
             status: 401,
