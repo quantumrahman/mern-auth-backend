@@ -1,12 +1,15 @@
 // import modules ----------------------------------------->
 import 'dotenv/config';
+import crypto from 'crypto';
 import User from '../models/user.model.js';
+import generateOtp from '../utils/generator/otp.generator.js'
 import generatorJwt from '../utils/generator/jwt.generator.js';
 import AppError from '../utils/constructors/error.constructor.js';
 import emailValidator from '../utils/validator/email.validator.js';
 import compareValidator from '../utils/validator/compare.validator.js';
 import sendWelcomeEmail from '../utils/services/send.welcome.email.js';
 import generateHashPassword from '../utils/generator/hashpass.generator.js';
+import sendVerificationOtpEmail from '../utils/services/send.verification.otp.email.js';
 
 // signup controller -------------------------------------->
 export const signUpController = async (req, res, next) => {
@@ -172,5 +175,47 @@ export const signOutController = async (req, res, next) => {
 
 // auth verification otp controller ----------------------->
 export const verificationOtpController = async (req, res, next) => {
+    try {
+        const user = req.user;
 
+        if (!user) throw new AppError("Invalid or expired token!", {
+            status: 401,
+            code: "UNAUTHORIZED"
+        });
+
+        const existingUser = await User.findById(user._id);
+
+        if (!existingUser) throw new AppError("User not found!", {
+            status: 404,
+            code: "USER_NOT_FOUND"
+        });
+
+        if (existingUser.isVerified) throw new AppError("Account already verified!", {
+            status: 400,
+            code: "ALREADY_VERIFIED"
+        });
+
+        const verificationOtp = generateOtp();
+        const hashOtp = crypto.createHash('sha256').update(verificationOtp).digest('hex');
+
+        existingUser.verificationOtp = hashOtp;
+        existingUser.verificationOtpExpAt = Date.now() + 5 * 60 * 1000;
+
+        await existingUser.save();
+
+        sendVerificationOtpEmail({
+            username: user.name,
+            userEmail: user.email,
+            verificationOtp: verificationOtp
+        })
+        .catch(err => console.log("Email error: ", err));
+
+        return res.status(200).json({
+            success: true,
+            message: "Send verification otp."
+        });
+
+    } catch (error) {
+        next(error);
+    }
 };
