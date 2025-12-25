@@ -15,7 +15,7 @@ router.route('/sign_out').get(signOutController);
 router.use(authMiddleware);
 
 // protected routes --------------------------------------->
-router.route('/verification_otp').patch(verificationOtpController);
+router.route('/send_verification_otp').get(verificationOtpController);
 
 // export modules ----------------------------------------->
 export default router;
