@@ -169,3 +169,8 @@ export const signOutController = async (req, res, next) => {
         next(error);
     }
 };
+
+// auth verification otp controller ----------------------->
+export const verificationOtpController = async (req, res, next) => {
+
+};
