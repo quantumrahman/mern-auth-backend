@@ -176,21 +176,21 @@ export const signOutController = async (req, res, next) => {
 // auth verification otp controller ----------------------->
 export const verificationOtpController = async (req, res, next) => {
     try {
-        const user = req.user;
+        const authUser = req.user;
 
-        if (!user) throw new AppError("Invalid or expired token!", {
+        if (!authUser) throw new AppError("Invalid or expired token!", {
             status: 401,
             code: "UNAUTHORIZED"
         });
 
-        const existingUser = await User.findById(user._id);
+        const user = await User.findById(user._id);
 
-        if (!existingUser) throw new AppError("User not found!", {
+        if (!user) throw new AppError("User not found!", {
             status: 404,
             code: "USER_NOT_FOUND"
         });
 
-        if (existingUser.isVerified) throw new AppError("Account already verified!", {
+        if (user.isVerified) throw new AppError("Account already verified!", {
             status: 400,
             code: "ALREADY_VERIFIED"
         });
@@ -198,10 +198,10 @@ export const verificationOtpController = async (req, res, next) => {
         const verificationOtp = generateOtp();
         const hashOtp = crypto.createHash('sha256').update(verificationOtp).digest('hex');
 
-        existingUser.verificationOtp = hashOtp;
-        existingUser.verificationOtpExpAt = Date.now() + 5 * 60 * 1000;
+        user.verificationOtp = hashOtp;
+        user.verificationOtpExpAt = Date.now() + 5 * 60 * 1000;
 
-        await existingUser.save();
+        await user.save();
 
         sendVerificationOtpEmail({
             username: user.name,
