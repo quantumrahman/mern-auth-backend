@@ -4,6 +4,7 @@ import User from '../models/user.model.js';
 import generatorJwt from '../utils/generator/jwt.generator.js';
 import AppError from '../utils/constructors/error.constructor.js';
 import emailValidator from '../utils/validator/email.validator.js';
+import compareValidator from '../utils/validator/compare.validator.js';
 import sendWelcomeEmail from '../utils/services/send.welcome.email.js';
 import generateHashPassword from '../utils/generator/hashpass.generator.js';
 
@@ -11,7 +12,7 @@ import generateHashPassword from '../utils/generator/hashpass.generator.js';
 export const signUpController = async (req, res, next) => {
     try {
         const { name, email, password } = req.body;
-    
+
         if (!name || !email || !password) throw new AppError("All fields is required!", {
             status: 400,
             code: "VALIDATION_ERROR",
@@ -19,9 +20,9 @@ export const signUpController = async (req, res, next) => {
                 fields: ['name', 'email', 'password'],
             },
         });
-    
+
         const isValidEmail = emailValidator(email);
-    
+
         if (!isValidEmail) throw new AppError("Email is invalid!", {
             status: 400,
             code: "VALIDATION_ERROR",
@@ -29,9 +30,9 @@ export const signUpController = async (req, res, next) => {
                 field: 'email',
             },
         });
-    
+
         const MIN_PASSWORD_LENGTH = 8;
-    
+
         if (password.length < MIN_PASSWORD_LENGTH) throw new AppError("Password must be at least 8 characters!", {
             status: 400,
             code: "VALIDATION_ERROR",
@@ -40,7 +41,8 @@ export const signUpController = async (req, res, next) => {
             },
         });
 
-        const existingUser = await User.findOne({ email });
+        const normalizedEmail = email.trim().toLowerCase();
+        const existingUser = await User.findOne({ email: normalizedEmail });
 
         if (existingUser) throw new AppError("A user with this email already exists!", {
             status: 409,
@@ -51,7 +53,7 @@ export const signUpController = async (req, res, next) => {
 
         const createUser = new User({
             name: name,
-            email: email,
+            email: normalizedEmail,
             password: hashedPassword
         });
 
@@ -91,5 +93,60 @@ export const signUpController = async (req, res, next) => {
 
 // signin controller -------------------------------------->
 export const signInController = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
 
+        if (!email || !password) throw new AppError("Invalid credentials!", {
+            status: 401,
+            code: "AUTHENTICATION_ERROR"
+        });
+
+        const isValidEmail = emailValidator(email);
+
+        if (!isValidEmail) throw new AppError("Invalid credentials!", {
+            status: 401,
+            code: "AUTHENTICATION_ERROR"
+        });
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) throw new AppError("Invalid credentials!", {
+            status: 401,
+            code: "AUTHENTICATION_ERROR"
+        });
+
+        const isPasswordMatch = await compareValidator({
+            inputPassword: password,
+            hashPassword: user.password
+        });
+
+        if (!isPasswordMatch) throw new AppError("Invalid credentials!", {
+            status: 401,
+            code: "AUTHENTICATION_ERROR"
+        });
+
+        const token = generatorJwt({
+            userId: user._id,
+            userEmail: user.email
+        });
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        const userObj = user.toObject();
+        delete userObj.password;
+
+        return res.status(200).json({
+            success: true,
+            message: "User login successfully.",
+            user: userObj
+        });
+    } catch (error) {
+        next(error);
+    }
 };
