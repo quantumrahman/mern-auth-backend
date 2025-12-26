@@ -13,16 +13,16 @@ import {
 const router = express.Router();
 
 // routes ------------------------------------------------->
-router.route('/sign_up').post(signUpController);
-router.route('/sign_in').post(signInController);
-router.route('/sign_out').get(signOutController);
+router.route('/signup').post(signUpController);
+router.route('/signin').post(signInController);
+router.route('/signout').post(signOutController);
 
 // route middleware --------------------------------------->
 router.use(authMiddleware);
 
 // protected routes --------------------------------------->
-router.route('/send_verification_otp').get(verificationOtpController);
-router.route('/verify_email').patch(verifyEmailController);
+router.route('/send-verification-otp').post(verificationOtpController);
+router.route('/verify-email').patch(verifyEmailController);
 
 // export modules ----------------------------------------->
 export default router;
