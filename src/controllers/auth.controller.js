@@ -207,7 +207,7 @@ export const verificationOtpController = async (req, res, next) => {
             userEmail: user.email,
             verificationOtp: verificationOtp
         })
-        .catch(err => console.log("Email error: ", err));
+            .catch(err => console.log("Email error: ", err));
 
         return res.status(200).json({
             success: true,
@@ -276,4 +276,9 @@ export const verifyEmailController = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+// reset password otp controller -------------------------->
+export const resetPasswordOtpController = async (req, res, next) => {
+
 };
