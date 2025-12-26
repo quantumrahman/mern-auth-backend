@@ -1,7 +1,13 @@
 // import modules ----------------------------------------->
 import express from 'express';
 import authMiddleware from '../middlewares/auth.middleware.js';
-import { signUpController, signInController, signOutController, verificationOtpController } from '../controllers/auth.controller.js';
+import {
+    signUpController,
+    signInController,
+    signOutController,
+    verificationOtpController,
+    verifyEmailController
+} from '../controllers/auth.controller.js';
 
 // router ------------------------------------------------->
 const router = express.Router();
@@ -16,6 +22,7 @@ router.use(authMiddleware);
 
 // protected routes --------------------------------------->
 router.route('/send_verification_otp').get(verificationOtpController);
+router.route('/verify_email').patch(verifyEmailController);
 
 // export modules ----------------------------------------->
 export default router;
