@@ -88,7 +88,6 @@ export const signUpController = async (req, res, next) => {
             message: "User register successfully.",
             user: userObj,
         });
-
     } catch (error) {
         next(error);
     }
@@ -183,7 +182,7 @@ export const verificationOtpController = async (req, res, next) => {
             code: "UNAUTHORIZED"
         });
 
-        const user = await User.findById(user._id);
+        const user = await User.findById(authUser._id);
 
         if (!user) throw new AppError("User not found!", {
             status: 404,
@@ -208,13 +207,12 @@ export const verificationOtpController = async (req, res, next) => {
             userEmail: user.email,
             verificationOtp: verificationOtp
         })
-            .catch(err => console.log("Email error: ", err));
+        .catch(err => console.log("Email error: ", err));
 
         return res.status(200).json({
             success: true,
             message: "Send verification otp."
         });
-
     } catch (error) {
         next(error);
     }
@@ -222,5 +220,60 @@ export const verificationOtpController = async (req, res, next) => {
 
 // auth verify controller --------------------------------->
 export const verifyEmailController = async (req, res, next) => {
+    try {
+        const authUser = req.user;
 
+        if (!authUser) throw new AppError("Invalild credentials!", {
+            status: 401,
+            code: "UNAUTHORIZED"
+        });
+
+        const { otp } = req.body;
+
+        if (!otp || typeof otp !== 'string' || !/^\d{6}$/.test(otp)) throw new AppError("Valid OTP is required!", {
+            status: 400,
+            code: "INVALID_OTP_FORMAT"
+        });
+
+        const user = await User.findById(authUser._id);
+
+        if (!user) throw new AppError("User not found!", {
+            status: 404,
+            code: "USER_NOT_FOUND"
+        });
+
+        if (user.isVerified) throw new AppError("Account already verified!", {
+            status: 409,
+            code: "ALREADY_VERIFIED"
+        });
+
+        if (!user.verificationOtp || user.verificationOtpExpAt < Date.now()) throw new AppError("OTP expired or invalid!", {
+            status: 400,
+            code: "OTP_EXPIRED"
+        });
+
+        const hashInputOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+        if (hashInputOtp !== user.verificationOtp) throw new AppError("Invalid OTP!", {
+            status: 400,
+            code: "INVALID_OTP"
+        });
+
+        user.isVerified = true;
+        user.verificationOtp = undefined;
+        user.verificationOtpExpAt = undefined;
+
+        await user.save();
+
+        const userObj = user.toObject();
+        delete userObj.password;
+
+        return res.status(200).json({
+            success: true,
+            message: "Account verification successfully!",
+            user: userObj
+        });
+    } catch (error) {
+        next(error);
+    }
 };
