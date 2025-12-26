@@ -78,7 +78,7 @@ export const signUpController = async (req, res, next) => {
             username: name,
             userEmail: email
         })
-        .catch(err => console.error("Email error: ", err));
+            .catch(err => console.error("Email error: ", err));
 
         const userObj = createUser.toObject();
         delete userObj.password;
@@ -208,7 +208,7 @@ export const verificationOtpController = async (req, res, next) => {
             userEmail: user.email,
             verificationOtp: verificationOtp
         })
-        .catch(err => console.log("Email error: ", err));
+            .catch(err => console.log("Email error: ", err));
 
         return res.status(200).json({
             success: true,
@@ -218,4 +218,9 @@ export const verificationOtpController = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+// auth verify controller --------------------------------->
+export const verifyEmailController = async (req, res, next) => {
+
 };
