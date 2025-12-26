@@ -6,7 +6,8 @@ import {
     signInController,
     signOutController,
     verificationOtpController,
-    verifyEmailController
+    verifyEmailController,
+    resetPasswordOtpController
 } from '../controllers/auth.controller.js';
 
 // router ------------------------------------------------->
@@ -16,6 +17,7 @@ const router = express.Router();
 router.route('/signup').post(signUpController);
 router.route('/signin').post(signInController);
 router.route('/signout').post(signOutController);
+router.route('/send-reset-password-otp').post(resetPasswordOtpController);
 
 // route middleware --------------------------------------->
 router.use(authMiddleware);
