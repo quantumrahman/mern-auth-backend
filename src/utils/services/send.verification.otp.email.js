@@ -1,6 +1,6 @@
 // import modules ----------------------------------------->
 import transporter from '../../config/config.nodemailer.js';
-import verificationOtpEmailTemplate from '../../templates/verification.otp.email.template.js';
+import verificationOtpEmailTemplate from '../../templates/otp.email.template.js';
 
 // email function ----------------------------------------->
 const sendVerificationOtpEmail = async ({ username, userEmail, verificationOtp }) => {
